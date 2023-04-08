@@ -1,0 +1,79 @@
+version: '3.8'
+services:
+  user-service:
+    image: user-service:latest
+    pull_policy: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      USER_SERVICE_PORT: ${USER_SERVICE_PORT:-8083}
+    ports:
+      - '${USER_SERVICE_PORT:-8083}:${USER_SERVICE_PORT:-8083}'
+    depends_on:
+      - postgres
+    networks:
+      - user-service-network
+
+  postgres:
+    image: postgres:alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - '${POSTGRES_PORT}:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+    networks:
+      - user-service-network
+
+  keycloak:
+    image: bitnami/keycloak:21.0.2-debian-11-r1
+    environment:
+      KEYCLOAK_ADMIN_USER: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_DATABASE_PORT: 5430
+      KEYCLOAK_DATABASE_HOST: postgres-keycloak
+      KEYCLOAK_DATABASE_NAME: keycloak
+      KEYCLOAK_DATABASE_USER: keycloak
+      KEYCLOAK_DATABASE_PASSWORD: keycloak
+      KEYCLOAK_HTTP_PORT: 8180
+    ports:
+      - "8180:8180"
+      - "8443:8443"
+    depends_on:
+      - postgres-keycloak
+      - user-service
+    networks:
+      - keycloak-network
+      - user-service-network
+    volumes:
+      - ./user-provider/target/user-provider-0.0.1-SNAPSHOT-fat.jar:/opt/bitnami/keycloak/providers/custom-provider.jar
+
+  postgres-keycloak:
+    image: postgres:alpine
+    restart: always
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    command:
+      -p 5430
+    volumes:
+      - db-keycloak:/var/lib/postgresql/data
+    networks:
+      - keycloak-network
+
+networks:
+  keycloak-network:
+  user-service-network:
+
+volumes:
+  db:
+    driver: local
+  db-keycloak:
+    driver: local

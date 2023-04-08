@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>me.krzysztofprogramming</groupId>
+	<artifactId>keycloak-integration</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>keycloak-integration-project</name>
+	<description>Integration with keycloak with custom user provider</description>
+	<packaging>pom</packaging>
+	<properties>
+		<java.version>17</java.version>
+		<spring-cloud.version>2021.0.6</spring-cloud.version>
+	</properties>
+	<modules>
+		<module>spring-boot-microservices</module>
+		<module>user-provider</module>
+	</modules>
+
+</project>

@@ -12,6 +12,7 @@ import me.krzysztofprogramming.userprovider.user.CustomUserStorageProviderFactor
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import org.keycloak.component.ComponentModel;
+import org.keycloak.storage.ReadOnlyException;
 
 import java.util.*;
 
@@ -95,7 +96,7 @@ public class UserClientService {
         try {
             return this.userClient.updateUser(userId, modifiedUser);
         } catch (FeignException.Conflict | FeignException.NotFound e) {
-            throw new RuntimeException("Can't update user: " + exceptionMessagesMap
+            throw new ReadOnlyException("Can't update user: " + exceptionMessagesMap
                     .getOrDefault(e.getClass(), "unknown reason"));
         }
     }
@@ -106,7 +107,7 @@ public class UserClientService {
             RequestBody body = RequestBody.create(jsonString, MediaType.get("application/json"));
             return this.userClient.updateUser(userId, body);
         } catch (FeignException.Conflict | FeignException.NotFound e) {
-            throw new RuntimeException("Can't update user: " + exceptionMessagesMap
+            throw new ReadOnlyException("Can't update user: " + exceptionMessagesMap
                     .getOrDefault(e.getClass(), "unknown reason"));
         }
     }

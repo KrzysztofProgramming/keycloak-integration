@@ -9,6 +9,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.SubjectCredentialManager;
 import org.keycloak.models.UserModel;
+import org.keycloak.storage.ReadOnlyException;
 import org.keycloak.storage.StorageId;
 import org.keycloak.storage.adapter.AbstractUserAdapter;
 
@@ -21,7 +22,7 @@ import java.util.stream.Stream;
 
 
 @Slf4j
-public class CustomUserAdapter extends AbstractUserAdapter.Streams {
+class CustomUserAdapter extends AbstractUserAdapter.Streams {
 
     private final String keycloakId;
     private final UserClientService userClientService;
@@ -146,14 +147,28 @@ public class CustomUserAdapter extends AbstractUserAdapter.Streams {
     @Override
     public void setSingleAttribute(String name, String value) {
         Optional.ofNullable(this.propertiesSettersMap.get(name))
-                .orElseThrow(() -> new RuntimeException("Can't update this property"))
+                .orElseThrow(() -> new ReadOnlyException("Can't update this property"))
                 .accept(value);
     }
 
     @Override
     public void removeAttribute(String name) {
+        if (!propertiesNamesMap.containsKey(name)) throw new ReadOnlyException("Can't update this property");
         user = userClientService.removeProperty(user.getId(), Optional.ofNullable(propertiesNamesMap.get(name))
-                .orElseThrow(() -> new RuntimeException("Can't remove this property")));
+                .orElseThrow(() -> new ReadOnlyException("Can't remove this property")));
+    }
+
+    @Override
+    public void removeRequiredAction(String action) {
+    }
+
+    @Override
+    public void removeRequiredAction(RequiredAction action) {
+    }
+
+    @Override
+    public void setEmailVerified(boolean verified) {
+        if (verified) super.setEmailVerified(true);
     }
 
     @Override

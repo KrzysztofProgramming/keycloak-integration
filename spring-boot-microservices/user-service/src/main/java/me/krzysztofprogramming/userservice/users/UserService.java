@@ -1,19 +1,18 @@
 package me.krzysztofprogramming.userservice.users;
 
+import lombok.AllArgsConstructor;
 import me.krzysztofprogramming.userservice.users.models.WrongCredentialsException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
 @Service
+@AllArgsConstructor
 public class UserService {
 
-    @Autowired
-    private UserEntityRepository userEntityRepository;
+    private final UserEntityRepository userEntityRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     public void validateUserCredentials(String username, String password) {
         userEntityRepository.findByUsername(username)

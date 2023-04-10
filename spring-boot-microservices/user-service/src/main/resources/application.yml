@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: user-service
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:user-service}
+    password: ${POSTGRES_PASSWORD:postgres}
+    username: ${POSTGRES_USER:postgres}
+  jpa:
+    show-sql: ${SHOW_SQL:false}
+    hibernate:
+      ddl-auto: update
+      jdbc:
+        time-zone: UTC
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+
+server:
+  port: ${USER_SERVICE_PORT:8083}
+  servlet:
+    context-path: /api/v1
+
+eureka:
+  client:
+    enabled: false
+    service-url:
+      defaultZone: http://localhost:8082/eureka

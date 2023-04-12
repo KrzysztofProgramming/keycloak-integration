@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: resources-service
+
+keycloak:
+  realm: Testing
+  resource: Spring-resources-server
+  public-client: false
+  bearer-only: true
+  use-resource-role-mappings: false
+  credentials:
+    secret: MacHPgDhFl7KwJoqpl8cmIHMgkDGlRIy

@@ -5,10 +5,11 @@ import me.krzysztofprogramming.userservice.users.UserEntityRepository;
 import me.krzysztofprogramming.userservice.users.models.UserEntity;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class SpringDataRestTest {
 
 
@@ -49,6 +51,12 @@ public class SpringDataRestTest {
     @SpyBean
     private AuditingHandler handler;
 
+    @Value("${application.api-key.value}")
+    private String apiKey;
+
+    @Value("${application.api-key.header}")
+    private String apiKeyHeader;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -56,7 +64,6 @@ public class SpringDataRestTest {
     }
 
     @Test
-    @Order(1)
     public void shouldAddNewUser() {
 
         //given
@@ -73,6 +80,7 @@ public class SpringDataRestTest {
 
         webTestClient.post().uri("/users")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header(apiKeyHeader, apiKey)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(Mono.just(newUserRequest), NewUserRequest.class)
 
@@ -105,6 +113,27 @@ public class SpringDataRestTest {
                 .returns(Timestamp.from(createdDateTime.toInstant()), UserEntity::getCreatedDate)
                 .returns(Timestamp.from(createdDateTime.toInstant()), UserEntity::getLastModifiedDate)
                 .matches(userEntity -> passwordEncoder.matches("password", userEntity.getHashedPassword()));
+    }
+
+    @Test
+    public void shouldReturn401WhenNoApiKey() {
+        //given
+        webTestClient.get().uri("/users")
+                .accept(MediaType.APPLICATION_JSON)
+                //when
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+    @Test
+    public void shouldReturn403WhenWrongApiKey() {
+        //given
+        webTestClient.get().uri("/users")
+                .header(apiKeyHeader, apiKey + "wrong")
+                .accept(MediaType.APPLICATION_JSON)
+                //when
+                .exchange()
+                .expectStatus().isForbidden();
     }
 
 

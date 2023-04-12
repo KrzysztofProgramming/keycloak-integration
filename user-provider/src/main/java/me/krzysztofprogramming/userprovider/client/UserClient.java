@@ -11,26 +11,30 @@ import java.util.Map;
 
 interface UserClient {
     @RequestLine("GET /users/{id}")
-    CustomUserModel getUserById(@Param("id") String id);
+    @Headers("api-key: {key}")
+    CustomUserModel getUserById(@Param("id") String id, @Param("key") String key);
 
     @RequestLine("GET /users/search/findByUsername?username={username}")
-    CustomUserModel searchUserByUsername(@Param("username") String username);
+    @Headers("api-key: {key}")
+    CustomUserModel searchUserByUsername(@Param("username") String username, @Param("key") String key);
 
     @RequestLine("GET /users/search/findByEmail?email={email}")
-    CustomUserModel searchUserByEmail(@Param("email") String email);
+    @Headers("api-key: {key}")
+    CustomUserModel searchUserByEmail(@Param("email") String email, @Param("key") String key);
 
     @RequestLine("GET /users")
-    GetUsersResponseDto getUsers(@QueryMap Map<String, String> params);
+    @Headers("api-key: {key}")
+    GetUsersResponseDto getUsers(@QueryMap Map<String, String> params, @Param("key") String key);
 
     @RequestLine("PATCH /users/{id}")
-    @Headers("Content-Type: application/json")
-    CustomUserModel updateUser(@Param("id") String userId, CustomUserModel modifiedUser);
+    @Headers({"Content-Type: application/json", "api-key: {key}"})
+    CustomUserModel updateUser(@Param("id") String userId, CustomUserModel modifiedUser, @Param("key") String key);
 
     @RequestLine("PATCH /users/{id}")
-    @Headers("Content-Type: application/json")
-    CustomUserModel updateUser(@Param("id") String userId, RequestBody requestBody);
+    @Headers({"Content-Type: application/json", "api-key: {key}"})
+    CustomUserModel updateUser(@Param("id") String userId, RequestBody requestBody, @Param("key") String key);
 
     @RequestLine("POST /validate")
-    @Headers("Content-Type: application/json")
-    void validateUserCredentials(UserCredentialsDto userCredentialsDto);
+    @Headers({"Content-Type: application/json", "api-key: {key}"})
+    void validateUserCredentials(UserCredentialsDto userCredentialsDto, @Param("key") String key);
 }

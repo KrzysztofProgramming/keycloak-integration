@@ -20,17 +20,20 @@ import java.util.*;
 public class UserClientService {
     private final UserClient userClient;
 
+    private final ComponentModel componentModel;
+
     private final Map<Class<? extends Throwable>, String> exceptionMessagesMap = new HashMap<>();
 
     public UserClientService(ComponentModel model) {
         userClient = createUserClient(model);
+        this.componentModel = model;
 
         exceptionMessagesMap.put(FeignException.NotFound.class, "User does not exists");
         exceptionMessagesMap.put(FeignException.Conflict.class, "This property cannot have that value");
     }
 
     private UserClient createUserClient(ComponentModel model) {
-        return Feign.builder().
+        return Feign.builder(). //TODO add error decoder for 403 and 401
                 client(new OkHttpClient())
                 .encoder(new JacksonEncoder())
                 .decoder(new UserDecoder())
@@ -41,7 +44,7 @@ public class UserClientService {
 
     public Optional<CustomUserModel> findUserById(String id) {
         try {
-            return Optional.of(userClient.getUserById(id));
+            return Optional.of(userClient.getUserById(id, getApiKey()));
         } catch (FeignException.NotFound e) {
             return Optional.empty();
         }
@@ -49,7 +52,7 @@ public class UserClientService {
 
     public Optional<CustomUserModel> findUserByEmail(String email) {
         try {
-            return Optional.of(userClient.searchUserByEmail(email));
+            return Optional.of(userClient.searchUserByEmail(email, getApiKey()));
         } catch (FeignException.NotFound e) {
             return Optional.empty();
         }
@@ -57,7 +60,7 @@ public class UserClientService {
 
     public Optional<CustomUserModel> findUserByUsername(String username) {
         try {
-            return Optional.of(userClient.searchUserByUsername(username));
+            return Optional.of(userClient.searchUserByUsername(username, getApiKey()));
         } catch (FeignException.NotFound e) {
             return Optional.empty();
         }
@@ -76,7 +79,7 @@ public class UserClientService {
         params.put("page", pageNumber + "");
         params.put("pageSize", pageSize + "");
         try {
-            return userClient.getUsers(params);
+            return userClient.getUsers(params, getApiKey());
         } catch (FeignException.NotFound exception) {
             return new GetUsersResponseDto(new GetUsersResponseListDto(Collections.emptyList()),
                     new PageResponseDto(0, pageSize, 0, pageNumber));
@@ -85,7 +88,7 @@ public class UserClientService {
 
     public boolean validateCredentials(String username, String password) {
         try {
-            userClient.validateUserCredentials(new UserCredentialsDto(username, password));
+            userClient.validateUserCredentials(new UserCredentialsDto(username, password), getApiKey());
             return true;
         } catch (FeignException.BadRequest exception) {
             return false;
@@ -94,7 +97,7 @@ public class UserClientService {
 
     public CustomUserModel updateUser(String userId, CustomUserModel modifiedUser) {
         try {
-            return this.userClient.updateUser(userId, modifiedUser);
+            return this.userClient.updateUser(userId, modifiedUser, getApiKey());
         } catch (FeignException.Conflict | FeignException.NotFound e) {
             throw new ReadOnlyException("Can't update user: " + exceptionMessagesMap
                     .getOrDefault(e.getClass(), "unknown reason"));
@@ -105,11 +108,15 @@ public class UserClientService {
         try {
             String jsonString = "{\"" + propertyName + "\": null}";
             RequestBody body = RequestBody.create(jsonString, MediaType.get("application/json"));
-            return this.userClient.updateUser(userId, body);
+            return this.userClient.updateUser(userId, body, getApiKey());
         } catch (FeignException.Conflict | FeignException.NotFound e) {
             throw new ReadOnlyException("Can't update user: " + exceptionMessagesMap
                     .getOrDefault(e.getClass(), "unknown reason"));
         }
+    }
+
+    private String getApiKey() {
+        return componentModel.get(CustomUserStorageProviderFactory.API_KEY);
     }
 
 }

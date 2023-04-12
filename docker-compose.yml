@@ -22,12 +22,28 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-postgres}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      USER_SERVICE_API_KEY: ${USER_SERVICE_API_KEY:-03918417-a69a-4a49-95e1-48939efeefdb}
     ports:
       - '${POSTGRES_PORT}:5432'
     volumes:
       - db:/var/lib/postgresql/data
     networks:
       - user-service-network
+
+  resource-service:
+    image: resources-service:latest
+    environment:
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM:-master}
+      KEYCLOAK_URL: http://keycloak:${KEYCLOAK_PORT:-8180}/
+      KEYCLOAK_CLIENT: ${KEYCLOAK_CLIENT:-spring-resources-server}
+      RESOURCES_SERVICE_PORT: ${RESOURCES_SERVICE_PORT:-8084}
+      KEYCLOAK_SECRET: ${KEYCLOAK_SECRET:-nOgeUOAggL7xVhjHeFLMa24kjIxvjLDP}
+    ports:
+      - '${RESOURCES_SERVICE_PORT:-8084}:${RESOURCES_SERVICE_PORT:-8084}'
+    networks:
+      - keycloak-network
+    depends_on:
+      - keycloak
 
   keycloak:
     image: bitnami/keycloak:21.0.2-debian-11-r1
@@ -39,9 +55,9 @@ services:
       KEYCLOAK_DATABASE_NAME: keycloak
       KEYCLOAK_DATABASE_USER: keycloak
       KEYCLOAK_DATABASE_PASSWORD: keycloak
-      KEYCLOAK_HTTP_PORT: 8180
+      KEYCLOAK_HTTP_PORT: ${KEYCLOAK_PORT:-8180}
     ports:
-      - "8180:8180"
+      - "${KEYCLOAK_PORT:-8180}:${KEYCLOAK_PORT:-8180}"
       - "8443:8443"
     depends_on:
       - postgres-keycloak

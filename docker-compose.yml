@@ -23,6 +23,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-postgres}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      USER_SERVICE_API_KEY: ${USER_SERVICE_API_KEY:-03918417-a69a-4a49-95e1-48939efeefdb}
     ports:
       - '${POSTGRES_PORT}:5432'
     volumes:

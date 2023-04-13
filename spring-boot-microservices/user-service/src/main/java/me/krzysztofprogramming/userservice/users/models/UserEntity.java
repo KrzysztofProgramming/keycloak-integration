@@ -2,12 +2,15 @@ package me.krzysztofprogramming.userservice.users.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+import me.krzysztofprogramming.userservice.roles.RoleEntity;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.data.rest.core.annotation.RestResource;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.Set;
 
 @Entity
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -51,12 +54,13 @@ public class UserEntity {
     @Builder.Default
     private Boolean isEnabled = true;
 
-//    @ManyToMany(cascade = CascadeType.PERSIST)
-//    @JoinTable(
-//            name="users_roles",
-//            joinColumns = @JoinColumn(name = "user_id"),
-//            inverseJoinColumns = @JoinColumn(name = "role_name")
-//    )
-//    private Set<RoleEntity> userRoles;
+    @ManyToMany
+    @JoinTable(
+            name = "users_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    @RestResource(exported = false)
+    private Set<RoleEntity> userRoles;
 
 }

@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 @SuppressWarnings("unused")
-@RepositoryRestResource(collectionResourceRel = "user_table", path = "users")
+@RepositoryRestResource(collectionResourceRel = UserEntity.TABLE_NAME, path = "users")
 public interface UserEntityRepository extends JpaRepository<UserEntity, Long> {
 
     Optional<UserEntity> findByEmail(String email);

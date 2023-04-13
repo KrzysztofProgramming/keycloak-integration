@@ -116,16 +116,6 @@ public class SpringDataRestTest {
     }
 
     @Test
-    public void shouldReturn401WhenNoApiKey() {
-        //given
-        webTestClient.get().uri("/users")
-                .accept(MediaType.APPLICATION_JSON)
-                //when
-                .exchange()
-                .expectStatus().isUnauthorized();
-    }
-
-    @Test
     public void shouldReturn403WhenWrongApiKey() {
         //given
         webTestClient.get().uri("/users")

@@ -9,6 +9,7 @@ services:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
       USER_SERVICE_PORT: ${USER_SERVICE_PORT:-8083}
+      USER_SERVICE_API_KEY: ${USER_SERVICE_API_KEY:-03918417-a69a-4a49-95e1-48939efeefdb}
     ports:
       - '${USER_SERVICE_PORT:-8083}:${USER_SERVICE_PORT:-8083}'
     depends_on:
@@ -22,7 +23,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-postgres}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      USER_SERVICE_API_KEY: ${USER_SERVICE_API_KEY:-03918417-a69a-4a49-95e1-48939efeefdb}
     ports:
       - '${POSTGRES_PORT}:5432'
     volumes:

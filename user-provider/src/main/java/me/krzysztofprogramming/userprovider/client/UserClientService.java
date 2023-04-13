@@ -15,6 +15,8 @@ import org.keycloak.component.ComponentModel;
 import org.keycloak.storage.ReadOnlyException;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Slf4j
 public class UserClientService {
@@ -43,80 +45,102 @@ public class UserClientService {
     }
 
     public Optional<CustomUserModel> findUserById(String id) {
-        try {
-            return Optional.of(userClient.getUserById(id, getApiKey()));
-        } catch (FeignException.NotFound e) {
-            return Optional.empty();
-        }
+        return catchErrors(
+                () -> Optional.of(userClient.getUserById(id, getApiKey())),
+                e -> Optional.empty()
+        );
     }
 
     public Optional<CustomUserModel> findUserByEmail(String email) {
-        try {
-            return Optional.of(userClient.searchUserByEmail(email, getApiKey()));
-        } catch (FeignException.NotFound e) {
-            return Optional.empty();
-        }
+        return catchErrors(
+                () -> Optional.of(userClient.searchUserByEmail(email, getApiKey()))
+        );
     }
 
     public Optional<CustomUserModel> findUserByUsername(String username) {
-        try {
-            return Optional.of(userClient.searchUserByUsername(username, getApiKey()));
-        } catch (FeignException.NotFound e) {
-            return Optional.empty();
-        }
+        return catchErrors(
+                () -> Optional.of(userClient.searchUserByUsername(username, getApiKey()))
+        );
     }
 
     public List<CustomUserModel> findUsers(int pageNumber, int pageSize) {
-        return getUsersResponseDto(pageNumber, pageSize).get_embedded().getUser_table();
+        return catchErrors(
+                () -> getUsersResponseDto(pageNumber, pageSize).get_embedded().getUser_table(),
+                e -> Collections.emptyList()
+        );
     }
 
     public int countUsers() {
-        return this.getUsersResponseDto(0, 1).getPage().getTotalElements();
+        return catchErrors(
+                () -> this.getUsersResponseDto(0, 1).getPage().getTotalElements(),
+                e -> 0
+        );
     }
 
     private GetUsersResponseDto getUsersResponseDto(int pageNumber, int pageSize) {
         Map<String, String> params = new HashMap<>();
         params.put("page", pageNumber + "");
         params.put("pageSize", pageSize + "");
-        try {
-            return userClient.getUsers(params, getApiKey());
-        } catch (FeignException.NotFound exception) {
-            return new GetUsersResponseDto(new GetUsersResponseListDto(Collections.emptyList()),
-                    new PageResponseDto(0, pageSize, 0, pageNumber));
-        }
+        return catchErrors(
+                () -> userClient.getUsers(params, getApiKey()),
+                e -> new GetUsersResponseDto(new GetUsersResponseListDto(Collections.emptyList()),
+                        new PageResponseDto(0, pageSize, 0, pageNumber))
+        );
     }
 
     public boolean validateCredentials(String username, String password) {
-        try {
-            userClient.validateUserCredentials(new UserCredentialsDto(username, password), getApiKey());
-            return true;
-        } catch (FeignException.BadRequest exception) {
-            return false;
-        }
+        return catchErrors(
+                () -> {
+                    userClient.validateUserCredentials(new UserCredentialsDto(username, password), getApiKey());
+                    return true;
+                },
+                e -> false
+        );
     }
 
     public CustomUserModel updateUser(String userId, CustomUserModel modifiedUser) {
-        try {
-            return this.userClient.updateUser(userId, modifiedUser, getApiKey());
-        } catch (FeignException.Conflict | FeignException.NotFound e) {
-            throw new ReadOnlyException("Can't update user: " + exceptionMessagesMap
-                    .getOrDefault(e.getClass(), "unknown reason"));
-        }
+        return catchErrors(
+                () -> this.userClient.updateUser(userId, modifiedUser, getApiKey()),
+                e -> {
+                    throw new ReadOnlyException("Can't update user: " + exceptionMessagesMap
+                            .getOrDefault(e.getClass(), "unknown reason"));
+                }
+        );
     }
 
     public CustomUserModel removeProperty(String userId, String propertyName) {
-        try {
-            String jsonString = "{\"" + propertyName + "\": null}";
-            RequestBody body = RequestBody.create(jsonString, MediaType.get("application/json"));
-            return this.userClient.updateUser(userId, body, getApiKey());
-        } catch (FeignException.Conflict | FeignException.NotFound e) {
-            throw new ReadOnlyException("Can't update user: " + exceptionMessagesMap
-                    .getOrDefault(e.getClass(), "unknown reason"));
-        }
+        return catchErrors(
+                () -> {
+                    String jsonString = "{\"" + propertyName + "\": null}";
+                    RequestBody body = RequestBody.create(jsonString, MediaType.get("application/json"));
+                    return this.userClient.updateUser(userId, body, getApiKey());
+                },
+                e -> {
+                    throw new ReadOnlyException("Can't update user: " + exceptionMessagesMap
+                            .getOrDefault(e.getClass(), "unknown reason"));
+                }
+        );
     }
 
     private String getApiKey() {
         return componentModel.get(CustomUserStorageProviderFactory.API_KEY);
+    }
+
+    private <T> T catchErrors(Supplier<T> action, Function<FeignException, T> onErrorSupplier) {
+        try {
+            return action.get();
+        } catch (FeignException.NotFound | FeignException.Conflict | FeignException.Forbidden
+                 | FeignException.Unauthorized exception) {
+            if (exception instanceof FeignException.Forbidden
+                    || exception instanceof FeignException.Unauthorized) {
+                log.warn("Cannot access user-service, make sure you setup api-key correctly");
+            }
+            return onErrorSupplier.apply(exception);
+        }
+    }
+
+    private <T> Optional<T> catchErrors(Supplier<Optional<T>> action) {
+        return catchErrors(action, e -> Optional.empty());
     }
 
 }

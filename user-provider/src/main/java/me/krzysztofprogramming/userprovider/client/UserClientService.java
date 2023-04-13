@@ -23,7 +23,6 @@ public class UserClientService {
     private final UserClient userClient;
 
     private final ComponentModel componentModel;
-
     private final Map<Class<? extends Throwable>, String> exceptionMessagesMap = new HashMap<>();
 
     public UserClientService(ComponentModel model) {
@@ -35,7 +34,7 @@ public class UserClientService {
     }
 
     private UserClient createUserClient(ComponentModel model) {
-        return Feign.builder(). //TODO add error decoder for 403 and 401
+        return Feign.builder().
                 client(new OkHttpClient())
                 .encoder(new JacksonEncoder())
                 .decoder(new UserDecoder())
@@ -142,5 +141,4 @@ public class UserClientService {
     private <T> Optional<T> catchErrors(Supplier<Optional<T>> action) {
         return catchErrors(action, e -> Optional.empty());
     }
-
 }

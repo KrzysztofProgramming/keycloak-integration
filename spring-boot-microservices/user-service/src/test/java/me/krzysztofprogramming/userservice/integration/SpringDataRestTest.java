@@ -126,7 +126,6 @@ public class SpringDataRestTest {
                 .expectStatus().isForbidden();
     }
 
-
     private UserEntity createUserEntity() {
         return UserEntity.builder()
                 .id(1L)

@@ -1,8 +1,9 @@
+
 application:
   api-key:
     value: ${USER_SERVICE_API_KEY}
     header: ${USER_SERVICE_API_KEY_HEADER:api-key}
-
+    
 spring:
   application:
     name: user-service
@@ -24,6 +25,7 @@ server:
   port: ${USER_SERVICE_PORT:8083}
   servlet:
     context-path: /api/v1
+
 logging:
   level:
     me.krzysztofprogramming: ${DEBUG_LEVEL:INFO}

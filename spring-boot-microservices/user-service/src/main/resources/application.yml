@@ -1,8 +1,14 @@
+
+application:
+  api-key:
+    value: ${USER_SERVICE_API_KEY}
+    header: ${USER_SERVICE_API_KEY_HEADER:api-key}
+    
 spring:
   application:
     name: user-service
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:user-service}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5431}/${POSTGRES_DB:user-service}
     password: ${POSTGRES_PASSWORD:postgres}
     username: ${POSTGRES_USER:postgres}
   jpa:
@@ -15,14 +21,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-
 server:
   port: ${USER_SERVICE_PORT:8083}
   servlet:
     context-path: /api/v1
 
-eureka:
-  client:
-    enabled: false
-    service-url:
-      defaultZone: http://localhost:8082/eureka
+logging:
+  level:
+    me.krzysztofprogramming: ${DEBUG_LEVEL:INFO}

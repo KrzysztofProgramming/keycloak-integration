@@ -93,8 +93,8 @@ public class CustomUserStorageProvider implements UserStorageProvider,
         int pageSize = maxResults - firstResult;
         int pageNumber = firstResult / pageSize;
 
-        return userClientService.findUsers(pageNumber, pageSize).stream()
-                .map(user -> new CustomUserAdapter(keycloakSession, realm, componentModel, user, userClientService));
+        return addToCacheMaps(userClientService.findUsers(pageNumber, pageSize).stream()
+                .map(user -> new CustomUserAdapter(keycloakSession, realm, componentModel, user, userClientService)));
     }
 
     @Override

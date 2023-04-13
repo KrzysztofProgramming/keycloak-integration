@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: resources-service
+
+keycloak:
+  realm: ${KEYCLOAK_REALM:master}
+  auth-server-url: ${KEYCLOAK_URL}
+  resource: ${KEYCLOAK_CLIENT:spring-resources-server}
+  public-client: false
+  bearer-only: true
+  use-resource-role-mappings: false
+  credentials:
+    secret: ${KEYCLOAK_SECRET}
+
+server:
+  port: ${RESOURCES_SERVICE_PORT:8084}
+  servlet:
+    context-path: /api/v1

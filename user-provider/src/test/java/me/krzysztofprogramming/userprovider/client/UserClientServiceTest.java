@@ -23,9 +23,12 @@ public class UserClientServiceTest {
     private final UserClient userClient = mock(UserClient.class);
     private UserClientService userClientService;
 
+    private final String apiKey = "apiKey";
+
     @BeforeEach
     void setupUserService() throws NoSuchFieldException, IllegalAccessException {
         when(componentModel.get(CustomUserStorageProviderFactory.URL)).thenReturn("url");
+        when(componentModel.get(CustomUserStorageProviderFactory.API_KEY)).thenReturn(apiKey);
         userClientService = new UserClientService(componentModel);
         Field field = UserClientService.class.getDeclaredField("userClient");
         field.setAccessible(true);
@@ -36,13 +39,13 @@ public class UserClientServiceTest {
     @Test
     public void shouldFindUserById() {
         //given
-        when(userClient.getUserById(USER_MODEL.getId())).thenReturn(USER_MODEL);
+        when(userClient.getUserById(USER_MODEL.getId(), apiKey)).thenReturn(USER_MODEL);
 
         //when
         Optional<CustomUserModel> customUserModel = userClientService.findUserById(USER_MODEL.getId());
 
         //then
-        verify(userClient).getUserById(USER_MODEL.getId());
+        verify(userClient).getUserById(USER_MODEL.getId(), apiKey);
         Assertions.assertThat(customUserModel)
                 .isPresent().get()
                 .isEqualTo(USER_MODEL);
@@ -51,13 +54,13 @@ public class UserClientServiceTest {
     @Test
     public void shouldFindUserByEmail() {
         //given
-        when(userClient.searchUserByEmail(USER_MODEL.getEmail())).thenReturn(USER_MODEL);
+        when(userClient.searchUserByEmail(USER_MODEL.getEmail(), apiKey)).thenReturn(USER_MODEL);
 
         //when
         Optional<CustomUserModel> customUserModel = userClientService.findUserByEmail(USER_MODEL.getEmail());
 
         //then
-        verify(userClient).searchUserByEmail(USER_MODEL.getEmail());
+        verify(userClient).searchUserByEmail(USER_MODEL.getEmail(), apiKey);
         Assertions.assertThat(customUserModel)
                 .isPresent().get()
                 .isEqualTo(USER_MODEL);
@@ -66,13 +69,13 @@ public class UserClientServiceTest {
     @Test
     public void shouldFindUserByUsername() {
         //given
-        when(userClient.searchUserByUsername(USER_MODEL.getUsername())).thenReturn(USER_MODEL);
+        when(userClient.searchUserByUsername(USER_MODEL.getUsername(), apiKey)).thenReturn(USER_MODEL);
 
         //when
         Optional<CustomUserModel> customUserModel = userClientService.findUserByUsername(USER_MODEL.getUsername());
 
         //then
-        verify(userClient).searchUserByUsername(USER_MODEL.getUsername());
+        verify(userClient).searchUserByUsername(USER_MODEL.getUsername(), apiKey);
         Assertions.assertThat(customUserModel)
                 .isPresent().get()
                 .isEqualTo(USER_MODEL);
@@ -81,39 +84,39 @@ public class UserClientServiceTest {
     @Test
     public void shouldReturnEmptyById() {
         //given
-        when(userClient.getUserById(any())).thenThrow(FeignException.NotFound.class);
+        when(userClient.getUserById(any(), eq(apiKey))).thenThrow(FeignException.NotFound.class);
 
         //when
         Optional<CustomUserModel> customUserModel = userClientService.findUserById(USER_MODEL.getId());
 
         //then
-        verify(userClient).getUserById(USER_MODEL.getId());
+        verify(userClient).getUserById(USER_MODEL.getId(), apiKey);
         Assertions.assertThat(customUserModel).isEmpty();
     }
 
     @Test
     public void shouldReturnEmptyByUsername() {
         //given
-        when(userClient.searchUserByUsername(any())).thenThrow(FeignException.NotFound.class);
+        when(userClient.searchUserByUsername(any(), eq(apiKey))).thenThrow(FeignException.NotFound.class);
 
         //when
         Optional<CustomUserModel> customUserModel = userClientService.findUserByUsername(USER_MODEL.getUsername());
 
         //then
-        verify(userClient).searchUserByUsername(USER_MODEL.getUsername());
+        verify(userClient).searchUserByUsername(USER_MODEL.getUsername(), apiKey);
         Assertions.assertThat(customUserModel).isEmpty();
     }
 
     @Test
     public void shouldReturnEmptyByEmail() {
         //given
-        when(userClient.searchUserByEmail(any())).thenThrow(FeignException.NotFound.class);
+        when(userClient.searchUserByEmail(any(), eq(apiKey))).thenThrow(FeignException.NotFound.class);
 
         //when
         Optional<CustomUserModel> customUserModel = userClientService.findUserByEmail(USER_MODEL.getEmail());
 
         //then
-        verify(userClient).searchUserByEmail(USER_MODEL.getEmail());
+        verify(userClient).searchUserByEmail(USER_MODEL.getEmail(), apiKey);
         Assertions.assertThat(customUserModel).isEmpty();
     }
 
@@ -121,14 +124,14 @@ public class UserClientServiceTest {
     public void shouldRemoveProperty() throws IOException {
         //given
         CustomUserModel userModel = createUserModel();
-        when(userClient.updateUser(eq(userModel.getId()), (RequestBody) any())).thenReturn(userModel);
+        when(userClient.updateUser(eq(userModel.getId()), (RequestBody) any(), eq(apiKey))).thenReturn(userModel);
         ArgumentCaptor<RequestBody> bodyArgumentCaptor = ArgumentCaptor.forClass(RequestBody.class);
 
         //when
         userClientService.removeProperty(userModel.getId(), "lastname");
 
         //then
-        verify(userClient).updateUser(eq(userModel.getId()), bodyArgumentCaptor.capture());
+        verify(userClient).updateUser(eq(userModel.getId()), bodyArgumentCaptor.capture(), eq(apiKey));
         RequestBody body = bodyArgumentCaptor.getValue();
         Buffer buffer = new Buffer();
         body.writeTo(buffer);

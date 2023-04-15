@@ -1,6 +1,7 @@
 package me.krzysztofprogramming.userprovider.user;
 
 import me.krzysztofprogramming.userprovider.client.UserClientService;
+import me.krzysztofprogramming.userprovider.roles.RolesManager;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import static me.krzysztofprogramming.userprovider.TestUtils.SINGLE_USER_RESPONSE_DTO;
 import static me.krzysztofprogramming.userprovider.TestUtils.USER_MODEL;
 import static org.mockito.Mockito.*;
 
@@ -24,8 +26,10 @@ public class CustomUserStorageProviderTest {
     private final UserClientService userClientService = mock(UserClientService.class);
     private final RealmModel realmModel = mock(RealmModel.class);
 
+    private final RolesManager rolesManager = mock(RolesManager.class);
+
     private final CustomUserStorageProvider userProvider =
-            new CustomUserStorageProvider(keycloakSession, componentModel, userClientService);
+            new CustomUserStorageProvider(keycloakSession, componentModel, userClientService, rolesManager);
 
 
     @BeforeEach
@@ -37,9 +41,9 @@ public class CustomUserStorageProviderTest {
     public void shouldCacheUser() {
 
         //given
-        when(userClientService.findUserById(USER_MODEL.getId())).thenReturn(Optional.of(USER_MODEL));
-        when(userClientService.findUserByUsername(USER_MODEL.getUsername())).thenReturn(Optional.of(USER_MODEL));
-        when(userClientService.findUserByEmail(USER_MODEL.getEmail())).thenReturn(Optional.of(USER_MODEL));
+        when(userClientService.findUserById(USER_MODEL.getId())).thenReturn(Optional.of(SINGLE_USER_RESPONSE_DTO));
+        when(userClientService.findUserByUsername(USER_MODEL.getUsername())).thenReturn(Optional.of(SINGLE_USER_RESPONSE_DTO));
+        when(userClientService.findUserByEmail(USER_MODEL.getEmail())).thenReturn(Optional.of(SINGLE_USER_RESPONSE_DTO));
         List<UserModel> userModelList = new LinkedList<>();
 
         //when

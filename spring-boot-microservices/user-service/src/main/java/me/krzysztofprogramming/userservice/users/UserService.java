@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class UserService {
 
-    private final UserEntityRepository userEntityRepository;
+    private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
 
     public void validateUserCredentials(String username, String password) {
-        userEntityRepository.findByUsername(username)
+        userRepository.findByUsername(username)
                 .filter(user -> passwordEncoder.matches(password, user.getHashedPassword()))
                 .orElseThrow(WrongCredentialsException::new);
     }

@@ -2,21 +2,16 @@ package me.krzysztofprogramming.userprovider.user;
 
 import lombok.extern.slf4j.Slf4j;
 import me.krzysztofprogramming.userprovider.client.UserClientService;
+import me.krzysztofprogramming.userprovider.roles.RolesManager;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.credential.LegacyUserCredentialManager;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.SubjectCredentialManager;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
 import org.keycloak.storage.ReadOnlyException;
 import org.keycloak.storage.StorageId;
 import org.keycloak.storage.adapter.AbstractUserAdapter;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -28,13 +23,16 @@ class CustomUserAdapter extends AbstractUserAdapter.Streams {
     private final UserClientService userClientService;
     private final Map<String, Consumer<String>> propertiesSettersMap = new HashMap<>();
     private final Map<String, String> propertiesNamesMap = new HashMap<>();
+
+    private final RolesManager rolesManager;
     private CustomUserModel user;
 
     public CustomUserAdapter(KeycloakSession session, RealmModel realm, ComponentModel storageProviderModel,
-                             CustomUserModel user, UserClientService userClientService) {
+                             CustomUserModel user, RolesManager rolesManager, UserClientService userClientService) {
         super(session, realm, storageProviderModel);
         this.keycloakId = StorageId.keycloakId(storageProviderModel, user.getId());
         this.user = user;
+        this.rolesManager = rolesManager;
         this.userClientService = userClientService;
         this.initMaps();
     }
@@ -159,6 +157,51 @@ class CustomUserAdapter extends AbstractUserAdapter.Streams {
     }
 
     @Override
+    public Set<RoleModel> getRealmRoleMappings() {
+        return super.getRealmRoleMappings();
+    }
+
+    @Override
+    public Stream<RoleModel> getRealmRoleMappingsStream() {
+        return super.getRealmRoleMappingsStream();
+    }
+
+    @Override
+    public Set<RoleModel> getClientRoleMappings(ClientModel app) {
+        return super.getClientRoleMappings(app);
+    }
+
+    @Override
+    public Stream<RoleModel> getClientRoleMappingsStream(ClientModel app) {
+        return super.getClientRoleMappingsStream(app);
+    }
+
+    @Override
+    public Set<RoleModel> getRoleMappings() {
+        return super.getRoleMappings();
+    }
+
+    @Override
+    public Stream<RoleModel> getRoleMappingsStream() {
+        return super.getRoleMappingsStream();
+    }
+
+    @Override
+    public boolean hasRole(RoleModel role) {
+        return user.getUserRolesIds().contains(role.getId());
+    }
+
+    @Override
+    public void grantRole(RoleModel role) {
+        super.grantRole(role);
+    }
+
+    @Override
+    public void deleteRoleMapping(RoleModel role) {
+        super.deleteRoleMapping(role);
+    }
+
+    @Override
     public void removeRequiredAction(String action) {
     }
 
@@ -180,4 +223,6 @@ class CustomUserAdapter extends AbstractUserAdapter.Streams {
     public SubjectCredentialManager credentialManager() {
         return new LegacyUserCredentialManager(session, realm, this);
     }
+
+
 }

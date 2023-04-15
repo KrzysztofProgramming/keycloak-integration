@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import java.util.Date;
+import java.util.Set;
 
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -23,4 +24,5 @@ public class CustomUserModel {
     private Date createdDate;
     private Date lastModifiedDate;
     private Boolean isEnabled;
+    private Set<String> userRolesIds;
 }

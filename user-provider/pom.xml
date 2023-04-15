@@ -62,17 +62,17 @@
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-server-spi</artifactId>
-            <version>21.0.1</version>
+            <version>21.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-core</artifactId>
-            <version>21.0.1</version>
+            <version>21.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-model-legacy</artifactId>
-            <version>21.0.1</version>
+            <version>21.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

@@ -2,7 +2,10 @@ package me.krzysztofprogramming.userprovider.user;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.krzysztofprogramming.userprovider.client.GetUsersResponseDto;
 import me.krzysztofprogramming.userprovider.client.UserClientService;
+import me.krzysztofprogramming.userprovider.client.model.SingleUserResponseDto;
+import me.krzysztofprogramming.userprovider.roles.RolesManager;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.credential.CredentialInput;
 import org.keycloak.credential.CredentialInputValidator;
@@ -29,6 +32,8 @@ public class CustomUserStorageProvider implements UserStorageProvider,
     private KeycloakSession keycloakSession;
     private ComponentModel componentModel;
     private UserClientService userClientService;
+
+    private RolesManager rolesManager;
 
     @Override
     public void close() {
@@ -69,8 +74,10 @@ public class CustomUserStorageProvider implements UserStorageProvider,
                 );
     }
 
-    private CustomUserAdapter mapToUserAdapter(CustomUserModel user, RealmModel realm) {
-        return new CustomUserAdapter(keycloakSession, realm, componentModel, user, userClientService);
+    private CustomUserAdapter mapToUserAdapter(SingleUserResponseDto user, RealmModel realm) {
+        rolesManager.addRoles(user.getAssociatedRoles());
+        return new CustomUserAdapter(keycloakSession, realm, componentModel, user.getCustomUserModel(),
+                rolesManager, userClientService);
     }
 
     public UserModel addToCacheMaps(UserModel userModel) {
@@ -93,8 +100,11 @@ public class CustomUserStorageProvider implements UserStorageProvider,
         int pageSize = maxResults - firstResult;
         int pageNumber = firstResult / pageSize;
 
-        return addToCacheMaps(userClientService.findUsers(pageNumber, pageSize).stream()
-                .map(user -> new CustomUserAdapter(keycloakSession, realm, componentModel, user, userClientService)));
+        GetUsersResponseDto usersResponseDto = userClientService.getUsersResponseDto(pageNumber, pageSize);
+        rolesManager.addRoles(usersResponseDto.getUsersAssociatedRoles());
+        return addToCacheMaps(usersResponseDto.get_embedded().getUser_table().stream()
+                .map(user -> new CustomUserAdapter(keycloakSession, realm, componentModel, user,
+                        rolesManager, userClientService)));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package me.krzysztofprogramming.userprovider.user;
 
 import me.krzysztofprogramming.userprovider.client.UserClientService;
+import me.krzysztofprogramming.userprovider.roles.RolesManager;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,8 +47,10 @@ public class CustomUserAdapterTest {
     private final RealmModel realmModel = mock(RealmModel.class);
     private final ComponentModel componentModel = mock(ComponentModel.class);
 
+    private final RolesManager rolesManager = mock(RolesManager.class);
+
     private final CustomUserAdapter userAdapter = new CustomUserAdapter(keycloakSession, realmModel, componentModel,
-            userModel, userService);
+            userModel, rolesManager, userService);
 
     private static Stream<Arguments> createPropertiesToCheckArguments() {
         return Stream.of(

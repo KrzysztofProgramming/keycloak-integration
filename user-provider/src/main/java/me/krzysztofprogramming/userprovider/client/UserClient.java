@@ -4,6 +4,7 @@ import feign.Headers;
 import feign.Param;
 import feign.QueryMap;
 import feign.RequestLine;
+import me.krzysztofprogramming.userprovider.client.model.SingleUserResponseDto;
 import me.krzysztofprogramming.userprovider.user.CustomUserModel;
 import okhttp3.RequestBody;
 
@@ -12,15 +13,15 @@ import java.util.Map;
 interface UserClient {
     @RequestLine("GET /users/{id}")
     @Headers("api-key: {key}")
-    CustomUserModel getUserById(@Param("id") String id, @Param("key") String key);
+    SingleUserResponseDto getUserById(@Param("id") String id, @Param("key") String key);
 
     @RequestLine("GET /users/search/findByUsername?username={username}")
     @Headers("api-key: {key}")
-    CustomUserModel searchUserByUsername(@Param("username") String username, @Param("key") String key);
+    SingleUserResponseDto searchUserByUsername(@Param("username") String username, @Param("key") String key);
 
     @RequestLine("GET /users/search/findByEmail?email={email}")
     @Headers("api-key: {key}")
-    CustomUserModel searchUserByEmail(@Param("email") String email, @Param("key") String key);
+    SingleUserResponseDto searchUserByEmail(@Param("email") String email, @Param("key") String key);
 
     @RequestLine("GET /users")
     @Headers("api-key: {key}")

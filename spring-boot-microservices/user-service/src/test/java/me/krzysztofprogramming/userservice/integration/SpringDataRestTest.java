@@ -1,7 +1,7 @@
 package me.krzysztofprogramming.userservice.integration;
 
 
-import me.krzysztofprogramming.userservice.users.UserEntityRepository;
+import me.krzysztofprogramming.userservice.users.UserRepository;
 import me.krzysztofprogramming.userservice.users.models.UserEntity;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +41,7 @@ public class SpringDataRestTest {
     @Autowired
     private WebTestClient webTestClient;
     @Autowired
-    private UserEntityRepository userEntityRepository;
+    private UserRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -102,7 +102,7 @@ public class SpringDataRestTest {
                 .jsonPath("$.hashedPassword").doesNotExist()
                 .jsonPath("$.password").doesNotExist();
 
-        Assertions.assertThat(userEntityRepository.findById(1L))
+        Assertions.assertThat(userRepository.findById(1L))
                 .isPresent().get()
                 .returns(expectedUser.getId(), UserEntity::getId)
                 .returns(expectedUser.getEmail(), UserEntity::getEmail)

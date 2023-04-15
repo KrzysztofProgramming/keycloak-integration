@@ -16,14 +16,14 @@ public class UserServiceTest {
 
     private final static String USERNAME = "username";
     private final static String PASSWORD = "password";
-    private final UserEntityRepository userEntityRepository = mock(UserEntityRepository.class);
+    private final UserRepository userRepository = mock(UserRepository.class);
     private final PasswordEncoder passwordEncoder = new Argon2PasswordEncoder();
-    private final UserService userService = new UserService(userEntityRepository, passwordEncoder);
+    private final UserService userService = new UserService(userRepository, passwordEncoder);
 
     @Test
     public void shouldValidateValidPassword() {
         //give
-        when(userEntityRepository.findByUsername(USERNAME)).thenReturn(Optional.of(
+        when(userRepository.findByUsername(USERNAME)).thenReturn(Optional.of(
                 UserEntity.builder()
                         .id(1L)
                         .username(USERNAME)
@@ -39,7 +39,7 @@ public class UserServiceTest {
     @Test
     public void shouldThrowWhenInvalidPassword() {
         //give
-        when(userEntityRepository.findByUsername(USERNAME)).thenReturn(Optional.of(
+        when(userRepository.findByUsername(USERNAME)).thenReturn(Optional.of(
                 UserEntity.builder()
                         .id(1L)
                         .username(USERNAME)

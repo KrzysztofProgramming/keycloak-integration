@@ -7,6 +7,7 @@ import feign.jackson.JacksonEncoder;
 import feign.okhttp.OkHttpClient;
 import feign.slf4j.Slf4jLogger;
 import lombok.extern.slf4j.Slf4j;
+import me.krzysztofprogramming.userprovider.client.model.SingleUserResponseDto;
 import me.krzysztofprogramming.userprovider.user.CustomUserModel;
 import me.krzysztofprogramming.userprovider.user.CustomUserStorageProviderFactory;
 import okhttp3.MediaType;
@@ -14,7 +15,10 @@ import okhttp3.RequestBody;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.storage.ReadOnlyException;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -43,29 +47,22 @@ public class UserClientService {
                 .target(UserClient.class, model.get(CustomUserStorageProviderFactory.URL));
     }
 
-    public Optional<CustomUserModel> findUserById(String id) {
+    public Optional<SingleUserResponseDto> findUserById(String id) {
         return catchErrors(
                 () -> Optional.of(userClient.getUserById(id, getApiKey())),
                 e -> Optional.empty()
         );
     }
 
-    public Optional<CustomUserModel> findUserByEmail(String email) {
+    public Optional<SingleUserResponseDto> findUserByEmail(String email) {
         return catchErrors(
                 () -> Optional.of(userClient.searchUserByEmail(email, getApiKey()))
         );
     }
 
-    public Optional<CustomUserModel> findUserByUsername(String username) {
+    public Optional<SingleUserResponseDto> findUserByUsername(String username) {
         return catchErrors(
                 () -> Optional.of(userClient.searchUserByUsername(username, getApiKey()))
-        );
-    }
-
-    public List<CustomUserModel> findUsers(int pageNumber, int pageSize) {
-        return catchErrors(
-                () -> getUsersResponseDto(pageNumber, pageSize).get_embedded().getUser_table(),
-                e -> Collections.emptyList()
         );
     }
 
@@ -76,14 +73,14 @@ public class UserClientService {
         );
     }
 
-    private GetUsersResponseDto getUsersResponseDto(int pageNumber, int pageSize) {
+    public GetUsersResponseDto getUsersResponseDto(int pageNumber, int pageSize) {
         Map<String, String> params = new HashMap<>();
         params.put("page", pageNumber + "");
         params.put("pageSize", pageSize + "");
         return catchErrors(
                 () -> userClient.getUsers(params, getApiKey()),
                 e -> new GetUsersResponseDto(new GetUsersResponseListDto(Collections.emptyList()),
-                        new PageResponseDto(0, pageSize, 0, pageNumber))
+                        Collections.emptySet(), new PageResponseDto(0, pageSize, 0, pageNumber))
         );
     }
 

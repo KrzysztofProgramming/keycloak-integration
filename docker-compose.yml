@@ -1,5 +1,31 @@
 version: '3.8'
 services:
+  api-gateway:
+    image: api-gateway:latest
+    environment:
+      KEYCLOAK_URL: http://keycloak:${KEYCLOAK_PORT:-8180}/
+      API_GATEWAY_PORT: 8081
+      EUREKA_SERVER_URL: http://eureka-server:8082/eureka
+    ports:
+      - "8081:8081"
+    depends_on:
+      - eureka-server
+      - resource-service
+      - user-service
+      - keycloak
+    networks:
+      - api-gateway-network
+
+  eureka-server:
+    image: eureka-server:latest
+    environment:
+      EUREKA_SERVER_PORT: 8082
+    ports:
+      - "8082:8082"
+    networks:
+      - api-gateway-network
+
+
   user-service:
     image: user-service:latest
     environment:
@@ -10,12 +36,13 @@ services:
       POSTGRES_PORT: 5432
       USER_SERVICE_PORT: ${USER_SERVICE_PORT:-8083}
       USER_SERVICE_API_KEY: ${USER_SERVICE_API_KEY:-03918417-a69a-4a49-95e1-48939efeefdb}
-    ports:
-      - '${USER_SERVICE_PORT:-8083}:${USER_SERVICE_PORT:-8083}'
+      EUREKA_SERVER_URL: http://eureka-server:8082/eureka
     depends_on:
       - postgres
+      - eureka-server
     networks:
       - user-service-network
+      - api-gateway-network
 
   postgres:
     image: postgres:alpine
@@ -24,7 +51,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
-      - '${POSTGRES_PORT}:5432'
+      - "${POSTGRES_PORT:-5431}:5432"
     volumes:
       - db:/var/lib/postgresql/data
     networks:
@@ -35,15 +62,16 @@ services:
     environment:
       KEYCLOAK_REALM: ${KEYCLOAK_REALM:-master}
       KEYCLOAK_URL: http://keycloak:${KEYCLOAK_PORT:-8180}/
-      KEYCLOAK_CLIENT: ${KEYCLOAK_CLIENT:-spring-resources-server}
+      KEYCLOAK_CLIENT: ${KEYCLOAK_CLIENT:-Spring-resources-server}
       RESOURCES_SERVICE_PORT: ${RESOURCES_SERVICE_PORT:-8084}
-      KEYCLOAK_SECRET: ${KEYCLOAK_SECRET:-nOgeUOAggL7xVhjHeFLMa24kjIxvjLDP}
-    ports:
-      - '${RESOURCES_SERVICE_PORT:-8084}:${RESOURCES_SERVICE_PORT:-8084}'
+      KEYCLOAK_SECRET: ${KEYCLOAK_SECRET:-MacHPgDhFl7KwJoqpl8cmIHMgkDGlRIy}
+      EUREKA_SERVER_URL: http://eureka-server:8082/eureka
     networks:
       - keycloak-network
+      - api-gateway-network
     depends_on:
       - keycloak
+      - eureka-server
 
   keycloak:
     image: bitnami/keycloak:21.0.2-debian-11-r1
@@ -56,15 +84,18 @@ services:
       KEYCLOAK_DATABASE_USER: keycloak
       KEYCLOAK_DATABASE_PASSWORD: keycloak
       KEYCLOAK_HTTP_PORT: ${KEYCLOAK_PORT:-8180}
-    ports:
-      - "${KEYCLOAK_PORT:-8180}:${KEYCLOAK_PORT:-8180}"
-      - "8443:8443"
+      USER_SERVICE_API_KEY: ${USER_SERVICE_API_KEY:-03918417-a69a-4a49-95e1-48939efeefdb}
+      USER_SERVICE_API_URL: http://user-service:8083/api/v1
+      KEYCLOAK_EXTRA_ARGS: "--log-level=INFO,me.krzysztofprogramming:debug"
     depends_on:
       - postgres-keycloak
       - user-service
+    ports:
+      - "${KEYCLOAK_PORT:-8180}:${KEYCLOAK_PORT:-8180}"
     networks:
       - keycloak-network
       - user-service-network
+      - api-gateway-network
     volumes:
       - ./user-provider/target/user-provider-0.0.1-SNAPSHOT-fat.jar:/opt/bitnami/keycloak/providers/custom-provider.jar
 
@@ -74,6 +105,8 @@ services:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: keycloak
+    ports:
+      - "5430:5430"
     command:
       -p 5430
     volumes:
@@ -84,6 +117,7 @@ services:
 networks:
   keycloak-network:
   user-service-network:
+  api-gateway-network:
 
 volumes:
   db:

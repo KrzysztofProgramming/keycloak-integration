@@ -1,0 +1,37 @@
+server:
+  port: ${API_GATEWAY_PORT:8081}
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/users/**
+          filters:
+            - StripPrefix=1
+
+        - id: resources-service
+          uri: lb://resources-service
+          predicates:
+            - Path=/resources/**
+          filters:
+            - StripPrefix=1
+
+        - id: keycloak
+          uri: ${KEYCLOAK_URL:http://localhost:8180/}
+          predicates:
+            - Path=/auth/**
+          filters:
+            - StripPrefix=1
+
+
+eureka:
+  client:
+    enabled: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8082/eureka}

@@ -85,13 +85,12 @@ public class UserClientService {
     }
 
     public boolean validateCredentials(String username, String password) {
-        return catchErrors(
-                () -> {
-                    userClient.validateUserCredentials(new UserCredentialsDto(username, password), getApiKey());
-                    return true;
-                },
-                e -> false
-        );
+        try {
+            userClient.validateUserCredentials(new UserCredentialsDto(username, password), getApiKey());
+            return true;
+        } catch (FeignException.BadRequest e) {
+            return false;
+        }
     }
 
     public CustomUserModel updateUser(String userId, CustomUserModel modifiedUser) {

@@ -32,7 +32,6 @@ public class CustomUserStorageProvider implements UserStorageProvider,
     private KeycloakSession keycloakSession;
     private ComponentModel componentModel;
     private UserClientService userClientService;
-
     private RolesManager rolesManager;
 
     @Override
@@ -82,6 +81,7 @@ public class CustomUserStorageProvider implements UserStorageProvider,
 
     public UserModel addToCacheMaps(UserModel userModel) {
         if (userModel == null) return null;
+        log.debug("caching user {}", userModel);
         loadedUsersByIdMap.put(StorageId.externalId(userModel.getId()), userModel);
         loadedUsersByEmailMap.put(userModel.getEmail(), userModel);
         loadedUsersByUsernameMap.put(userModel.getUsername(), userModel);

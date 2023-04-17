@@ -1,4 +1,3 @@
-
 application:
   api-key:
     value: ${USER_SERVICE_API_KEY}
@@ -30,3 +29,9 @@ server:
 logging:
   level:
     me.krzysztofprogramming: ${DEBUG_LEVEL:INFO}
+
+eureka:
+  client:
+    enabled: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8082/eureka}

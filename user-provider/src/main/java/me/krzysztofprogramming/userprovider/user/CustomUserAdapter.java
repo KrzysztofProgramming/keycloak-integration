@@ -1,5 +1,6 @@
 package me.krzysztofprogramming.userprovider.user;
 
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import me.krzysztofprogramming.userprovider.client.UserClientService;
 import me.krzysztofprogramming.userprovider.roles.RolesManager;
@@ -13,18 +14,22 @@ import org.keycloak.storage.adapter.AbstractUserAdapter;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
 @Slf4j
+@ToString(onlyExplicitlyIncluded = true)
 class CustomUserAdapter extends AbstractUserAdapter.Streams {
 
+    @ToString.Include
     private final String keycloakId;
     private final UserClientService userClientService;
     private final Map<String, Consumer<String>> propertiesSettersMap = new HashMap<>();
     private final Map<String, String> propertiesNamesMap = new HashMap<>();
 
     private final RolesManager rolesManager;
+    @ToString.Include
     private CustomUserModel user;
 
     public CustomUserAdapter(KeycloakSession session, RealmModel realm, ComponentModel storageProviderModel,
@@ -178,12 +183,12 @@ class CustomUserAdapter extends AbstractUserAdapter.Streams {
 
     @Override
     public Set<RoleModel> getRoleMappings() {
-        return super.getRoleMappings();
+        return getClientRoleMappingsStream(null).collect(Collectors.toSet());
     }
 
     @Override
     public Stream<RoleModel> getRoleMappingsStream() {
-        return super.getRoleMappingsStream();
+        return user.getUserRolesIds().stream().map(rolesManager::getRoleById);
     }
 
     @Override

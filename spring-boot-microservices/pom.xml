@@ -18,6 +18,8 @@
     <modules>
         <module>user-service</module>
         <module>resources-service</module>
+        <module>api-gateway</module>
+        <module>eureka-server</module>
     </modules>
 
     <properties>

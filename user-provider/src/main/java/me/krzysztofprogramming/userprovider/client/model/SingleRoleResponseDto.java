@@ -1,5 +1,6 @@
 package me.krzysztofprogramming.userprovider.client.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +11,9 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SingleRoleResponseDto {
-    private String id;
+
+    @JsonProperty("id")
+    private String name;
     private String description;
     private Set<String> associatedRolesIds;
 }

@@ -17,17 +17,17 @@ import java.util.stream.Stream;
 @Builder
 public class CustomRoleModel implements RoleModel {
 
-    private final static String ERROR_MESSAGE = "This property is read only";
-
+    final static String ERROR_MESSAGE = "This property is read only";
+    private final RolesManager rolesManager;
     @EqualsAndHashCode.Include
-    private String id;
+    private String name;
     private String description;
     @Setter(AccessLevel.PACKAGE)
     private Set<RoleModel> associatedRoles;
 
     @Override
-    public String getName() {
-        return id;
+    public String getId() {
+        return name;
     }
 
     @Override
@@ -57,6 +57,9 @@ public class CustomRoleModel implements RoleModel {
 
     @Override
     public Stream<RoleModel> getCompositesStream(String search, Integer first, Integer max) {
+        if (first == null) first = 0;
+        if (max == null) max = Integer.MAX_VALUE;
+
         return associatedRoles.stream().skip(first).limit(max);
     }
 
@@ -72,7 +75,7 @@ public class CustomRoleModel implements RoleModel {
 
     @Override
     public RoleContainerModel getContainer() {
-        return null;
+        return rolesManager;
     }
 
     @Override
@@ -107,9 +110,18 @@ public class CustomRoleModel implements RoleModel {
         MultivaluedHashMap<String, String> attributes = new MultivaluedHashMap<>();
         attributes.add(SearchableFields.COMPOSITE_ROLE.getName(), isComposite() + "");
         attributes.add(SearchableFields.DESCRIPTION.getName(), description);
-        attributes.add(SearchableFields.ID.getName(), getId());
+        attributes.add(SearchableFields.ID.getName(), getName());
         attributes.add(SearchableFields.NAME.getName(), getName());
 
         return attributes;
+    }
+
+    @Override
+    public String toString() {
+        return "CustomRoleModel{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", associatedRoles=" + associatedRoles.stream().map(RoleModel::getName).toList() +
+                '}';
     }
 }

@@ -3,6 +3,7 @@ package me.krzysztofprogramming.userservice.users;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.krzysztofprogramming.userservice.users.models.UserNotFoundException;
+import me.krzysztofprogramming.userservice.users.models.WrongCredentialsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,6 +49,11 @@ class UserController {
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public void handleUserNotFound() {
+    }
+
+    @ExceptionHandler({IllegalArgumentException.class, WrongCredentialsException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public void handleWrongPassword() {
     }
 
 }

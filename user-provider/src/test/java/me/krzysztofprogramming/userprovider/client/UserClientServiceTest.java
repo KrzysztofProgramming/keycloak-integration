@@ -1,6 +1,7 @@
 package me.krzysztofprogramming.userprovider.client;
 
 import feign.FeignException;
+import me.krzysztofprogramming.userprovider.client.model.SingleUserResponseDto;
 import me.krzysztofprogramming.userprovider.user.CustomUserModel;
 import me.krzysztofprogramming.userprovider.user.CustomUserStorageProviderFactory;
 import okhttp3.RequestBody;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Optional;
 
+import static me.krzysztofprogramming.userprovider.TestUtils.SINGLE_USER_RESPONSE_DTO;
 import static me.krzysztofprogramming.userprovider.TestUtils.USER_MODEL;
 import static org.mockito.Mockito.*;
 
@@ -39,46 +41,46 @@ public class UserClientServiceTest {
     @Test
     public void shouldFindUserById() {
         //given
-        when(userClient.getUserById(USER_MODEL.getId(), apiKey)).thenReturn(USER_MODEL);
+        when(userClient.getUserById(USER_MODEL.getId(), apiKey)).thenReturn(SINGLE_USER_RESPONSE_DTO);
 
         //when
-        Optional<CustomUserModel> customUserModel = userClientService.findUserById(USER_MODEL.getId());
+        Optional<SingleUserResponseDto> customUserModel = userClientService.findUserById(USER_MODEL.getId());
 
         //then
         verify(userClient).getUserById(USER_MODEL.getId(), apiKey);
         Assertions.assertThat(customUserModel)
                 .isPresent().get()
-                .isEqualTo(USER_MODEL);
+                .isEqualTo(SINGLE_USER_RESPONSE_DTO);
     }
 
     @Test
     public void shouldFindUserByEmail() {
         //given
-        when(userClient.searchUserByEmail(USER_MODEL.getEmail(), apiKey)).thenReturn(USER_MODEL);
+        when(userClient.searchUserByEmail(USER_MODEL.getEmail(), apiKey)).thenReturn(SINGLE_USER_RESPONSE_DTO);
 
         //when
-        Optional<CustomUserModel> customUserModel = userClientService.findUserByEmail(USER_MODEL.getEmail());
+        Optional<SingleUserResponseDto> customUserModel = userClientService.findUserByEmail(USER_MODEL.getEmail());
 
         //then
         verify(userClient).searchUserByEmail(USER_MODEL.getEmail(), apiKey);
         Assertions.assertThat(customUserModel)
                 .isPresent().get()
-                .isEqualTo(USER_MODEL);
+                .isEqualTo(SINGLE_USER_RESPONSE_DTO);
     }
 
     @Test
     public void shouldFindUserByUsername() {
         //given
-        when(userClient.searchUserByUsername(USER_MODEL.getUsername(), apiKey)).thenReturn(USER_MODEL);
+        when(userClient.searchUserByUsername(USER_MODEL.getUsername(), apiKey)).thenReturn(SINGLE_USER_RESPONSE_DTO);
 
         //when
-        Optional<CustomUserModel> customUserModel = userClientService.findUserByUsername(USER_MODEL.getUsername());
+        Optional<SingleUserResponseDto> customUserModel = userClientService.findUserByUsername(USER_MODEL.getUsername());
 
         //then
         verify(userClient).searchUserByUsername(USER_MODEL.getUsername(), apiKey);
         Assertions.assertThat(customUserModel)
                 .isPresent().get()
-                .isEqualTo(USER_MODEL);
+                .isEqualTo(SINGLE_USER_RESPONSE_DTO);
     }
 
     @Test
@@ -87,7 +89,7 @@ public class UserClientServiceTest {
         when(userClient.getUserById(any(), eq(apiKey))).thenThrow(FeignException.NotFound.class);
 
         //when
-        Optional<CustomUserModel> customUserModel = userClientService.findUserById(USER_MODEL.getId());
+        Optional<SingleUserResponseDto> customUserModel = userClientService.findUserById(USER_MODEL.getId());
 
         //then
         verify(userClient).getUserById(USER_MODEL.getId(), apiKey);
@@ -100,7 +102,7 @@ public class UserClientServiceTest {
         when(userClient.searchUserByUsername(any(), eq(apiKey))).thenThrow(FeignException.NotFound.class);
 
         //when
-        Optional<CustomUserModel> customUserModel = userClientService.findUserByUsername(USER_MODEL.getUsername());
+        Optional<SingleUserResponseDto> customUserModel = userClientService.findUserByUsername(USER_MODEL.getUsername());
 
         //then
         verify(userClient).searchUserByUsername(USER_MODEL.getUsername(), apiKey);
@@ -113,7 +115,7 @@ public class UserClientServiceTest {
         when(userClient.searchUserByEmail(any(), eq(apiKey))).thenThrow(FeignException.NotFound.class);
 
         //when
-        Optional<CustomUserModel> customUserModel = userClientService.findUserByEmail(USER_MODEL.getEmail());
+        Optional<SingleUserResponseDto> customUserModel = userClientService.findUserByEmail(USER_MODEL.getEmail());
 
         //then
         verify(userClient).searchUserByEmail(USER_MODEL.getEmail(), apiKey);

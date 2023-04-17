@@ -16,3 +16,9 @@ server:
   port: ${RESOURCES_SERVICE_PORT:8084}
   servlet:
     context-path: /api/v1
+
+eureka:
+  client:
+    enabled: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8082/eureka}

@@ -12,6 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-class GetUsersResponseListDto {
+public class GetUsersResponseListDto {
     private List<CustomUserModel> user_table;
 }

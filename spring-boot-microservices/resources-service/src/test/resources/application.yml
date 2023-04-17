@@ -10,3 +10,7 @@ keycloak:
   use-resource-role-mappings: false
   credentials:
     secret: MacHPgDhFl7KwJoqpl8cmIHMgkDGlRIy
+
+eureka:
+  client:
+    enabled: false

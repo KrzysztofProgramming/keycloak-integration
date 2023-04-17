@@ -1,13 +1,20 @@
 package me.krzysztofprogramming.userservice.users.models;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import lombok.*;
+import me.krzysztofprogramming.userservice.roles.RoleEntity;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.data.rest.core.annotation.RestResource;
 
 import javax.persistence.*;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -51,12 +58,28 @@ public class UserEntity {
     @Builder.Default
     private Boolean isEnabled = true;
 
-//    @ManyToMany(cascade = CascadeType.PERSIST)
-//    @JoinTable(
-//            name="users_roles",
-//            joinColumns = @JoinColumn(name = "user_id"),
-//            inverseJoinColumns = @JoinColumn(name = "role_name")
-//    )
-//    private Set<RoleEntity> userRoles;
+    @ManyToMany
+    @JoinTable(
+            name = "users_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    @RestResource(exported = false)
+    @JsonProperty("userRolesIds")
+    private Set<RoleEntity> userRoles;
+
+    @JsonGetter("userRolesIds")
+    public Set<String> serializeUserRoles() {
+        return userRoles == null ? Collections.emptySet() : userRoles.stream().map(RoleEntity::getId).collect(Collectors.toSet());
+    }
+
+    @JsonSetter("userRolesIds")
+    public void deserializeUserRoles(Set<String> userRolesIds) {
+        if (userRolesIds == null) {
+            userRoles = Collections.emptySet();
+            return;
+        }
+        userRoles = userRolesIds.stream().map(RoleEntity::new).collect(Collectors.toSet());
+    }
 
 }

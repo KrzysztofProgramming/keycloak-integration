@@ -1,5 +1,6 @@
 package me.krzysztofprogramming.userservice.config;
 
+import me.krzysztofprogramming.userservice.roles.RoleEntity;
 import me.krzysztofprogramming.userservice.users.models.UserEntity;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
@@ -13,5 +14,6 @@ public class RepositoryRestConfigurerImpl implements RepositoryRestConfigurer {
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config, CorsRegistry cors) {
         RepositoryRestConfigurer.super.configureRepositoryRestConfiguration(config, cors);
         config.exposeIdsFor(UserEntity.class);
+        config.exposeIdsFor(RoleEntity.class);
     }
 }

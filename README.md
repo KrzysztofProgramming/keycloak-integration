@@ -21,3 +21,8 @@ Microservices project with custom keycloak user storage provider.
 Go to http://localhost:8180 and log in as admin user with username and password ***admin***. Create a new realm from
 ***keycloak-realm-export.json***  
 New users can be created by making requests to http://localhost:8081/users/api/v1/users
+
+### TODO list:
+- improve users management directly from Keycloak admin console
+- add hibernate text search
+- write more tests

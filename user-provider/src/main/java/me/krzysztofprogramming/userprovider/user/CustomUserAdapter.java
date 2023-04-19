@@ -2,8 +2,6 @@ package me.krzysztofprogramming.userprovider.user;
 
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import me.krzysztofprogramming.userprovider.client.UserClientService;
-import me.krzysztofprogramming.userprovider.roles.RolesManager;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.credential.LegacyUserCredentialManager;
@@ -28,16 +26,14 @@ class CustomUserAdapter extends AbstractUserAdapter.Streams {
     private final Map<String, Consumer<String>> propertiesSettersMap = new HashMap<>();
     private final Map<String, String> propertiesNamesMap = new HashMap<>();
 
-    private final RolesManager rolesManager;
     @ToString.Include
     private CustomUserModel user;
 
     public CustomUserAdapter(KeycloakSession session, RealmModel realm, ComponentModel storageProviderModel,
-                             CustomUserModel user, RolesManager rolesManager, UserClientService userClientService) {
+                             CustomUserModel user, UserClientService userClientService) {
         super(session, realm, storageProviderModel);
         this.keycloakId = StorageId.keycloakId(storageProviderModel, user.getId());
         this.user = user;
-        this.rolesManager = rolesManager;
         this.userClientService = userClientService;
         this.initMaps();
     }
@@ -163,22 +159,22 @@ class CustomUserAdapter extends AbstractUserAdapter.Streams {
 
     @Override
     public Set<RoleModel> getRealmRoleMappings() {
-        return super.getRealmRoleMappings();
+        return getRoleMappingsStream().collect(Collectors.toSet());
     }
 
     @Override
     public Stream<RoleModel> getRealmRoleMappingsStream() {
-        return super.getRealmRoleMappingsStream();
+        return getRoleMappingsStream();
     }
 
     @Override
     public Set<RoleModel> getClientRoleMappings(ClientModel app) {
-        return super.getClientRoleMappings(app);
+        return Collections.emptySet();
     }
 
     @Override
     public Stream<RoleModel> getClientRoleMappingsStream(ClientModel app) {
-        return super.getClientRoleMappingsStream(app);
+        return Stream.empty();
     }
 
     @Override
@@ -188,7 +184,7 @@ class CustomUserAdapter extends AbstractUserAdapter.Streams {
 
     @Override
     public Stream<RoleModel> getRoleMappingsStream() {
-        return user.getUserRolesIds().stream().map(rolesManager::getRoleById);
+        return user.getUserRolesIds().stream().map(realm::getRole);
     }
 
     @Override

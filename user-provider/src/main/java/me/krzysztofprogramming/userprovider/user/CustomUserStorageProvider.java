@@ -2,10 +2,6 @@ package me.krzysztofprogramming.userprovider.user;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.krzysztofprogramming.userprovider.client.GetUsersResponseDto;
-import me.krzysztofprogramming.userprovider.client.UserClientService;
-import me.krzysztofprogramming.userprovider.client.model.SingleUserResponseDto;
-import me.krzysztofprogramming.userprovider.roles.RolesManager;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.credential.CredentialInput;
 import org.keycloak.credential.CredentialInputValidator;
@@ -15,6 +11,7 @@ import org.keycloak.storage.StorageId;
 import org.keycloak.storage.UserStorageProvider;
 import org.keycloak.storage.user.UserLookupProvider;
 import org.keycloak.storage.user.UserQueryProvider;
+import org.keycloak.storage.user.UserRegistrationProvider;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,15 +21,16 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 @Slf4j
 public class CustomUserStorageProvider implements UserStorageProvider,
-        UserLookupProvider, CredentialInputValidator, UserQueryProvider {
+        UserLookupProvider, CredentialInputValidator, UserQueryProvider,
+        UserRegistrationProvider {
 
+    public static final String PROVIDER_ID = "custom-user-storage-provider";
     private final Map<String, UserModel> loadedUsersByIdMap = new HashMap<>();
     private final Map<String, UserModel> loadedUsersByEmailMap = new HashMap<>();
     private final Map<String, UserModel> loadedUsersByUsernameMap = new HashMap<>();
     private KeycloakSession keycloakSession;
     private ComponentModel componentModel;
     private UserClientService userClientService;
-    private RolesManager rolesManager;
 
     @Override
     public void close() {
@@ -74,9 +72,11 @@ public class CustomUserStorageProvider implements UserStorageProvider,
     }
 
     private CustomUserAdapter mapToUserAdapter(SingleUserResponseDto user, RealmModel realm) {
-        rolesManager.addRoles(user.getAssociatedRoles());
+//        log.debug(keycloakSession.getProvider(UserStorageProvider.class, CustomUserStorageProvider.PROVIDER_ID).getClass().getName());
+//        ((CustomRoleStorageProvider)keycloakSession.getProvider(RoleStorageProvider.class, CustomRoleStorageProvider.PROVIDER_ID))
+//                .cacheRoles(user.getAssociatedRoles());
         return new CustomUserAdapter(keycloakSession, realm, componentModel, user.getCustomUserModel(),
-                rolesManager, userClientService);
+                userClientService);
     }
 
     public UserModel addToCacheMaps(UserModel userModel) {
@@ -100,11 +100,14 @@ public class CustomUserStorageProvider implements UserStorageProvider,
         int pageSize = maxResults - firstResult;
         int pageNumber = firstResult / pageSize;
 
+//        log.debug(keycloakSession.getComponentProvider(UserStorageProvider.class, CustomUserStorageProvider.PROVIDER_ID).getClass().getName());
         GetUsersResponseDto usersResponseDto = userClientService.getUsersResponseDto(pageNumber, pageSize);
-        rolesManager.addRoles(usersResponseDto.getUsersAssociatedRoles());
+//        ((CustomRoleStorageProvider)keycloakSession.getProvider(RoleStorageProvider.class, CustomRoleStorageProvider.PROVIDER_ID))
+//                .cacheRoles(usersResponseDto.getUsersAssociatedRoles());
+
         return addToCacheMaps(usersResponseDto.get_embedded().getUser_table().stream()
                 .map(user -> new CustomUserAdapter(keycloakSession, realm, componentModel, user,
-                        rolesManager, userClientService)));
+                        userClientService)));
     }
 
     @Override
@@ -144,5 +147,15 @@ public class CustomUserStorageProvider implements UserStorageProvider,
     public int getUsersCount(RealmModel realm, boolean includeServiceAccount) {
         if (userClientService == null) return 0;
         return userClientService.countUsers();
+    }
+
+    @Override
+    public UserModel addUser(RealmModel realm, String username) {
+        return null;
+    }
+
+    @Override
+    public boolean removeUser(RealmModel realm, UserModel user) {
+        return userClientService.deleteUser(StorageId.externalId(user.getId()));
     }
 }

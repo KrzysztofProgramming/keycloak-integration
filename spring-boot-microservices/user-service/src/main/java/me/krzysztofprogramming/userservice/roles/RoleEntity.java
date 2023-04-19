@@ -60,4 +60,15 @@ public class RoleEntity {
         }
         setAssociatedRoles(associatedRolesIds.stream().map(RoleEntity::new).collect(Collectors.toSet()));
     }
+
+    private Set<RoleEntity> unwrapAssociatedRoles(Set<RoleEntity> destination) {
+        if (destination.contains(this)) return destination;
+        destination.addAll(associatedRoles);
+        associatedRoles.forEach(role -> role.unwrapAssociatedRoles(destination));
+        return destination;
+    }
+
+    public Set<RoleEntity> unwrapAssociatedRoles() {
+        return unwrapAssociatedRoles(new HashSet<>());
+    }
 }

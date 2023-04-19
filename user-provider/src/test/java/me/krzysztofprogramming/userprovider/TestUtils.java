@@ -1,8 +1,8 @@
 package me.krzysztofprogramming.userprovider;
 
-import me.krzysztofprogramming.userprovider.client.model.SingleRoleResponseDto;
-import me.krzysztofprogramming.userprovider.client.model.SingleUserResponseDto;
+import me.krzysztofprogramming.userprovider.roles.RoleResponseDto;
 import me.krzysztofprogramming.userprovider.user.CustomUserModel;
+import me.krzysztofprogramming.userprovider.user.SingleUserResponseDto;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -24,10 +24,10 @@ public class TestUtils {
             .isEnabled(true)
             .build();
 
-    public static final Set<SingleRoleResponseDto> ASSOCIATED_ROLES = Set.of(
-            new SingleRoleResponseDto("A", "", Set.of("B")),
-            new SingleRoleResponseDto("B", "", Set.of("A")),
-            new SingleRoleResponseDto("C", "", Collections.emptySet())
+    public static final Set<RoleResponseDto> ASSOCIATED_ROLES = Set.of(
+            new RoleResponseDto("A", "", Set.of("B")),
+            new RoleResponseDto("B", "", Set.of("A")),
+            new RoleResponseDto("C", "", Collections.emptySet())
     );
 
     public static final SingleUserResponseDto SINGLE_USER_RESPONSE_DTO =

@@ -1,11 +1,9 @@
-package me.krzysztofprogramming.userprovider.client;
+package me.krzysztofprogramming.userprovider.user;
 
 import feign.Headers;
 import feign.Param;
 import feign.QueryMap;
 import feign.RequestLine;
-import me.krzysztofprogramming.userprovider.client.model.SingleUserResponseDto;
-import me.krzysztofprogramming.userprovider.user.CustomUserModel;
 import okhttp3.RequestBody;
 
 import java.util.Map;
@@ -38,4 +36,8 @@ interface UserClient {
     @RequestLine("POST /validate")
     @Headers({"Content-Type: application/json", "api-key: {key}"})
     void validateUserCredentials(UserCredentialsDto userCredentialsDto, @Param("key") String key);
+
+    @RequestLine("DELETE /users/{id}")
+    @Headers("api-key: {key}")
+    void deleteUser(@Param("id") String id, @Param("key") String key);
 }

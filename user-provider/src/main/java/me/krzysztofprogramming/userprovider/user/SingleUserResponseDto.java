@@ -1,10 +1,10 @@
-package me.krzysztofprogramming.userprovider.client.model;
+package me.krzysztofprogramming.userprovider.user;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import me.krzysztofprogramming.userprovider.user.CustomUserModel;
+import me.krzysztofprogramming.userprovider.roles.RoleResponseDto;
 
 import java.util.Set;
 
@@ -15,5 +15,5 @@ public class SingleUserResponseDto {
     @JsonUnwrapped
     private CustomUserModel customUserModel;
 
-    private Set<SingleRoleResponseDto> associatedRoles;
+    private Set<RoleResponseDto> associatedRoles;
 }

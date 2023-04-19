@@ -2,6 +2,7 @@ package me.krzysztofprogramming.userprovider.roles;
 
 import lombok.*;
 import org.keycloak.common.util.MultivaluedHashMap;
+import org.keycloak.models.RealmModel;
 import org.keycloak.models.RoleContainerModel;
 import org.keycloak.models.RoleModel;
 import org.keycloak.storage.ReadOnlyException;
@@ -15,10 +16,12 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
-public class CustomRoleModel implements RoleModel {
+class CustomRoleModel implements RoleModel {
 
     final static String ERROR_MESSAGE = "This property is read only";
-    private final RolesManager rolesManager;
+    private final RolesCacheStorage rolesCacheStorage;
+    @Setter(AccessLevel.PACKAGE)
+    private RealmModel realmModel;
     @EqualsAndHashCode.Include
     private String name;
     private String description;
@@ -70,12 +73,12 @@ public class CustomRoleModel implements RoleModel {
 
     @Override
     public String getContainerId() {
-        return "custom-user-storage-provider";
+        return realmModel.getId();
     }
 
     @Override
     public RoleContainerModel getContainer() {
-        return rolesManager;
+        return realmModel;
     }
 
     @Override

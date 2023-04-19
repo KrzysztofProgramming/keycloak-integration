@@ -1,4 +1,4 @@
-package me.krzysztofprogramming.userprovider.client;
+package me.krzysztofprogramming.userprovider.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -4,6 +4,7 @@ import me.krzysztofprogramming.userprovider.TestUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.keycloak.component.ComponentModel;
+import org.keycloak.models.RealmModel;
 
 import java.util.Collections;
 import java.util.Map;
@@ -12,10 +13,11 @@ import java.util.Set;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class RolesManagerTest {
+public class RolesCacheStorageTest {
 
     private final ComponentModel componentModel = mock(ComponentModel.class);
-    private final RolesManager rolesManager = new RolesManager(componentModel);
+    private final RealmModel realmModel = mock(RealmModel.class);
+    private final RolesCacheStorage rolesCacheStorage = new RolesCacheStorage();
 
 
     @Test
@@ -23,9 +25,9 @@ public class RolesManagerTest {
         //given
         when(componentModel.getId()).thenReturn("componentId");
 
-        CustomRoleModel roleA = new CustomRoleModel(rolesManager, "A", "", null);
-        CustomRoleModel roleB = new CustomRoleModel(rolesManager, "B", "", Set.of(roleA));
-        CustomRoleModel roleC = new CustomRoleModel(rolesManager, "C", "", Collections.emptySet());
+        CustomRoleModel roleA = new CustomRoleModel(rolesCacheStorage, realmModel, "A", "", null);
+        CustomRoleModel roleB = new CustomRoleModel(rolesCacheStorage, realmModel, "B", "", Set.of(roleA));
+        CustomRoleModel roleC = new CustomRoleModel(rolesCacheStorage, realmModel, "C", "", Collections.emptySet());
         roleA.setAssociatedRoles(Set.of(roleB));
 
 
@@ -35,9 +37,9 @@ public class RolesManagerTest {
                 "C", roleC
         );
         //when
-        rolesManager.addRoles(TestUtils.ASSOCIATED_ROLES);
+        rolesCacheStorage.addRoles(TestUtils.ASSOCIATED_ROLES);
 
         //then
-        Assertions.assertThat(rolesManager).returns(expectedRolesMap, RolesManager::getRolesByNames);
+        Assertions.assertThat(rolesCacheStorage).returns(expectedRolesMap, RolesCacheStorage::getRolesByNames);
     }
 }

@@ -1,11 +1,10 @@
-package me.krzysztofprogramming.userprovider.client;
-
+package me.krzysztofprogramming.userprovider.roles;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import me.krzysztofprogramming.userprovider.client.model.SingleRoleResponseDto;
+import me.krzysztofprogramming.userprovider.client.PageResponseDto;
 
 import java.util.Set;
 
@@ -13,8 +12,9 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetUsersResponseDto {
-    private GetUsersResponseListDto _embedded;
-    private Set<SingleRoleResponseDto> usersAssociatedRoles;
+public
+class GetRolesResponseDto {
+    private GetRolesResponseListDto _embedded;
+    private Set<RoleResponseDto> associatedRoles;
     private PageResponseDto page;
 }

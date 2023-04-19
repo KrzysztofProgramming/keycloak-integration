@@ -1,7 +1,5 @@
 package me.krzysztofprogramming.userprovider.user;
 
-import me.krzysztofprogramming.userprovider.client.UserClientService;
-import me.krzysztofprogramming.userprovider.roles.RolesManager;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,10 +24,8 @@ public class CustomUserStorageProviderTest {
     private final UserClientService userClientService = mock(UserClientService.class);
     private final RealmModel realmModel = mock(RealmModel.class);
 
-    private final RolesManager rolesManager = mock(RolesManager.class);
-
     private final CustomUserStorageProvider userProvider =
-            new CustomUserStorageProvider(keycloakSession, componentModel, userClientService, rolesManager);
+            new CustomUserStorageProvider(keycloakSession, componentModel, userClientService);
 
 
     @BeforeEach

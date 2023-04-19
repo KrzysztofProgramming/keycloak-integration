@@ -11,7 +11,7 @@ import java.util.Set;
 
 @Repository
 @RepositoryRestResource(collectionResourceRel = RoleEntity.TABLE_NAME, path = "roles")
-public interface RoleEntityRepository extends JpaRepository<RoleEntity, String> {
+public interface RoleRepository extends JpaRepository<RoleEntity, String> {
 
     @RestResource(path = "byIds")
     List<RoleEntity> findAllByIdIn(Set<String> ids);

@@ -1,7 +1,5 @@
 package me.krzysztofprogramming.userprovider.user;
 
-import me.krzysztofprogramming.userprovider.client.UserClientService;
-import me.krzysztofprogramming.userprovider.roles.RolesManager;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.component.ComponentValidationException;
 import org.keycloak.models.KeycloakSession;
@@ -36,12 +34,12 @@ public class CustomUserStorageProviderFactory implements UserStorageProviderFact
 
     @Override
     public CustomUserStorageProvider create(KeycloakSession session, ComponentModel model) {
-        return new CustomUserStorageProvider(session, model, new UserClientService(model), new RolesManager(model));
+        return new CustomUserStorageProvider(session, model, new UserClientService(model));
     }
 
     @Override
     public String getId() {
-        return "custom-user-storage-provider";
+        return CustomUserStorageProvider.PROVIDER_ID;
     }
 
     @Override

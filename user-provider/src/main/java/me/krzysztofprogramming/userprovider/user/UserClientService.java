@@ -1,4 +1,4 @@
-package me.krzysztofprogramming.userprovider.client;
+package me.krzysztofprogramming.userprovider.user;
 
 import feign.Feign;
 import feign.FeignException;
@@ -7,9 +7,8 @@ import feign.jackson.JacksonEncoder;
 import feign.okhttp.OkHttpClient;
 import feign.slf4j.Slf4jLogger;
 import lombok.extern.slf4j.Slf4j;
-import me.krzysztofprogramming.userprovider.client.model.SingleUserResponseDto;
-import me.krzysztofprogramming.userprovider.user.CustomUserModel;
-import me.krzysztofprogramming.userprovider.user.CustomUserStorageProviderFactory;
+import me.krzysztofprogramming.userprovider.client.AbstractClientService;
+import me.krzysztofprogramming.userprovider.client.PageResponseDto;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import org.keycloak.component.ComponentModel;
@@ -19,32 +18,28 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 @Slf4j
-public class UserClientService {
+class UserClientService extends AbstractClientService {
     private final UserClient userClient;
-
-    private final ComponentModel componentModel;
     private final Map<Class<? extends Throwable>, String> exceptionMessagesMap = new HashMap<>();
 
     public UserClientService(ComponentModel model) {
-        userClient = createUserClient(model);
-        this.componentModel = model;
+        super(model);
+        userClient = createUserClient();
 
         exceptionMessagesMap.put(FeignException.NotFound.class, "User does not exists");
         exceptionMessagesMap.put(FeignException.Conflict.class, "This property cannot have that value");
     }
 
-    private UserClient createUserClient(ComponentModel model) {
+    private UserClient createUserClient() {
         return Feign.builder().
                 client(new OkHttpClient())
                 .encoder(new JacksonEncoder())
                 .decoder(new UserDecoder())
                 .logger(new Slf4jLogger())
                 .logLevel(Logger.Level.FULL)
-                .target(UserClient.class, model.get(CustomUserStorageProviderFactory.URL));
+                .target(UserClient.class, getComponentModel().get(CustomUserStorageProviderFactory.URL));
     }
 
     public Optional<SingleUserResponseDto> findUserById(String id) {
@@ -74,12 +69,9 @@ public class UserClientService {
     }
 
     public GetUsersResponseDto getUsersResponseDto(int pageNumber, int pageSize) {
-        Map<String, String> params = new HashMap<>();
-        params.put("page", pageNumber + "");
-        params.put("pageSize", pageSize + "");
         return catchErrors(
-                () -> userClient.getUsers(params, getApiKey()),
-                e -> new GetUsersResponseDto(new GetUsersResponseListDto(Collections.emptyList()),
+                () -> userClient.getUsers(createPageParamsMap(pageNumber, pageSize), getApiKey()),
+                e -> new GetUsersResponseDto(new GetUsersResponseListDto(Collections.emptySet()),
                         Collections.emptySet(), new PageResponseDto(0, pageSize, 0, pageNumber))
         );
     }
@@ -117,24 +109,14 @@ public class UserClientService {
         );
     }
 
-    private String getApiKey() {
-        return componentModel.get(CustomUserStorageProviderFactory.API_KEY);
+    public boolean deleteUser(String userId) {
+        return catchErrors(
+                () -> {
+                    userClient.deleteUser(userId, getApiKey());
+                    return true;
+                },
+                e -> false
+        );
     }
 
-    private <T> T catchErrors(Supplier<T> action, Function<FeignException, T> onErrorSupplier) {
-        try {
-            return action.get();
-        } catch (FeignException.NotFound | FeignException.Conflict | FeignException.Forbidden
-                 | FeignException.Unauthorized exception) {
-            if (exception instanceof FeignException.Forbidden
-                    || exception instanceof FeignException.Unauthorized) {
-                log.warn("Cannot access user-service, make sure you setup api-key correctly");
-            }
-            return onErrorSupplier.apply(exception);
-        }
-    }
-
-    private <T> Optional<T> catchErrors(Supplier<Optional<T>> action) {
-        return catchErrors(action, e -> Optional.empty());
-    }
 }

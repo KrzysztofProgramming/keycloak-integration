@@ -1,9 +1,6 @@
-package me.krzysztofprogramming.userprovider.client;
+package me.krzysztofprogramming.userprovider.user;
 
 import feign.FeignException;
-import me.krzysztofprogramming.userprovider.client.model.SingleUserResponseDto;
-import me.krzysztofprogramming.userprovider.user.CustomUserModel;
-import me.krzysztofprogramming.userprovider.user.CustomUserStorageProviderFactory;
 import okhttp3.RequestBody;
 import okio.Buffer;
 import org.assertj.core.api.Assertions;

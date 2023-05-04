@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import lombok.*;
 import me.krzysztofprogramming.userservice.roles.RoleEntity;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -30,6 +33,7 @@ import java.util.stream.Collectors;
         @UniqueConstraint(name = "UK_" + UserEntity.TABLE_NAME + "_username", columnNames = "username"),
         @UniqueConstraint(name = "UK_" + UserEntity.TABLE_NAME + "_email", columnNames = "email")
 })
+@Indexed(index = "idx_user")
 public class UserEntity {
 
     public static final String TABLE_NAME = "user_table";
@@ -39,13 +43,17 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_sequence")
     private Long id;
     @Column(nullable = false)
+    @KeywordField
     private String username;
     @Column(nullable = false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY, value = "password")
     private String hashedPassword;
     @Column(nullable = false)
+    @KeywordField
     private String email;
+    @KeywordField
     private String firstname;
+    @KeywordField
     private String lastname;
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
@@ -56,6 +64,7 @@ public class UserEntity {
     @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE", nullable = false)
     private Date lastModifiedDate;
     @Builder.Default
+    @GenericField
     private Boolean isEnabled = true;
 
     @ManyToMany
